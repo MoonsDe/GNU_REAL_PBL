@@ -1,0 +1,43 @@
+# Flutter 및 Dart 관련 파일
+# --------------------------------
+# 빌드 결과물 (가장 중요!)
+/build/
+
+# Dart 도구 관련
+.dart_tool/
+
+# Flutter 플러그인 정보
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# 패키지 정보 (자동 생성됨)
+.packages
+.pub/
+/pubspec.lock  # <- 주석 처리됨. pubspec.lock은 팀원이 버전을 맞추기 위해 "포함"하는 것이 좋습니다.
+
+# IDE (편집기) 설정 파일
+# --------------------------------
+# VS Code
+.vscode/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS (운영체제) 관련 파일
+# --------------------------------
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# 민감한 정보 (팀 규칙에 따라 추가)
+# --------------------------------
+# 만약 API 키나 비밀 설정을 .json 또는 .dart 파일로 관리한다면
+# (예: google-services.json, secrets.dart)
+# *.json
+# secrets.dart
