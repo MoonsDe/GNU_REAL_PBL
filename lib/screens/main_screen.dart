@@ -1,6 +1,7 @@
 // lib/screens/main_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:gnu_real_pbl/screens/scan_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -164,7 +165,10 @@ class _MainScreenState extends State<MainScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  onPressed: () {},
+                  // (수정됨) 여기는 비워둡니다.
+                  onPressed: () {
+                    // TODO: "Add More" 기능 나중에 구현
+                  },
                 ),
               ),
               const SizedBox(width: 16),
@@ -180,13 +184,19 @@ class _MainScreenState extends State<MainScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  onPressed: () {},
+                  // (수정됨) ScanScreen으로 가는 코드를 이쪽으로 옮깁니다.
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ScanScreen(),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 32),
-
           // --- (대체됨) 5. 아이템 목록 GridView ---
           const Text(
             'Items',

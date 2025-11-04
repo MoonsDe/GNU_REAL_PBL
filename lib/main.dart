@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 // 1. (수정) main_screen.dart 대신 login_screen.dart를 import
 
 import 'package:gnu_real_pbl/screens/login_screen.dart';
+
 void main() {
   runApp(const MyApp());
 }
