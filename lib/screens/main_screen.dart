@@ -227,7 +227,13 @@ class _MainScreenState extends State<MainScreen> {
       ),
       // --- 6. 하단 네비게이션 바 및 중앙 버튼 ---
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        // (수정됨) ScanScreen으로 이동하는 코드를 여기에 추가합니다.
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ScanScreen()),
+          );
+        },
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
         child: const Icon(Icons.recycling_rounded),
