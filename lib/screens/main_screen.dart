@@ -1,6 +1,7 @@
 // lib/screens/main_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:gnu_real_pbl/screens/scan_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -164,7 +165,10 @@ class _MainScreenState extends State<MainScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  onPressed: () {},
+                  // (수정됨) 여기는 비워둡니다.
+                  onPressed: () {
+                    // TODO: "Add More" 기능 나중에 구현
+                  },
                 ),
               ),
               const SizedBox(width: 16),
@@ -180,13 +184,19 @@ class _MainScreenState extends State<MainScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  onPressed: () {},
+                  // (수정됨) ScanScreen으로 가는 코드를 이쪽으로 옮깁니다.
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ScanScreen(),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 32),
-
           // --- (대체됨) 5. 아이템 목록 GridView ---
           const Text(
             'Items',
@@ -217,7 +227,13 @@ class _MainScreenState extends State<MainScreen> {
       ),
       // --- 6. 하단 네비게이션 바 및 중앙 버튼 ---
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        // (수정됨) ScanScreen으로 이동하는 코드를 여기에 추가합니다.
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ScanScreen()),
+          );
+        },
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
         child: const Icon(Icons.recycling_rounded),
