@@ -1,7 +1,9 @@
 // lib/screens/scan_screen.dart
 
+import 'dart:io'; // File 객체 사용을 위해 필요
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart'; // 1. camera 패키지 import
+import 'package:camera/camera.dart';
+import 'package:image_picker/image_picker.dart'; // 1. image_picker import
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -11,74 +13,95 @@ class ScanScreen extends StatefulWidget {
 }
 
 class _ScanScreenState extends State<ScanScreen> {
-  // 2. 카메라 컨트롤러와 초기화 Future 선언
   CameraController? _controller;
   Future<void>? _initializeControllerFuture;
+
+  // 2. ImagePicker 객체 생성
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    // 카메라 초기화를 시작합니다.
     _initializeCamera();
   }
 
   Future<void> _initializeCamera() async {
-    // 3. 사용 가능한 카메라 목록을 가져옵니다.
-    final cameras = await availableCameras();
-    // 4. 첫 번째 카메라(보통 후면 카메라)를 선택합니다.
-    final firstCamera = cameras.first;
+    try {
+      final cameras = await availableCameras();
 
-    // 5. 컨트롤러를 생성합니다.
-    _controller = CameraController(
-      firstCamera,
-      ResolutionPreset.medium, // 해상도 설정
-    );
+      if (cameras.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('사용 가능한 카메라가 없습니다. (시뮬레이터 확인)')),
+        );
+        setState(() {
+          _initializeControllerFuture = Future.error('No cameras available');
+        });
+        return;
+      }
 
-    // 6. 컨트롤러 초기화 Future를 저장합니다.
-    // 이 Future가 FutureBuilder의 'future'가 됩니다.
-    _initializeControllerFuture = _controller!.initialize();
+      final firstCamera = cameras.first;
 
-    // initState는 async가 될 수 없으므로,
-    // 초기화 완료 후 UI를 갱신하기 위해 setState를 호출합니다.
-    if (!mounted) return;
-    setState(() {});
+      _controller = CameraController(firstCamera, ResolutionPreset.medium);
+
+      _initializeControllerFuture = _controller!.initialize();
+
+      if (!mounted) return;
+      setState(() {});
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('카메라 초기화 오류: $e')));
+    }
   }
 
   @override
   void dispose() {
-    // 7. 위젯이 종료될 때 컨트롤러를 반드시 폐기합니다.
     _controller?.dispose();
     super.dispose();
   }
 
+  // --- (기존) 카메라 촬영 함수 ---
   Future<void> _takePicture() async {
     try {
-      // 8. 카메라가 초기화될 때까지 기다립니다.
       await _initializeControllerFuture;
-
-      // 9. 사진을 촬영합니다.
       final image = await _controller!.takePicture();
 
-      // 위젯이 아직 화면에 있는지 확인
       if (!mounted) return;
-
-      // --- [협업 포인트] ---
-      // TODO: 1. AI/백엔드 팀과 상의하여 이 'image' (XFile)를 전송합니다.
-      // 예: await uploadImageToAIServer(image.path);
-
-      // TODO: 2. 분석 결과를 보여줄 result_screen.dart로 이동합니다.
-      // 예: Navigator.push(context, MaterialPageRoute(builder: (_) => ResultScreen(imagePath: image.path)));
-
-      // 우선은 촬영 성공을 알리는 스낵바를 띄웁니다.
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('사진이 촬영되었습니다! 경로: ${image.path}')));
+      _processImage(image.path); // 촬영된 이미지 처리
     } catch (e) {
-      // 오류 발생 시
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('오류 발생: $e')));
+      ).showSnackBar(SnackBar(content: Text('촬영 오류: $e')));
     }
+  }
+
+  // --- (추가됨) 갤러리에서 사진 가져오는 함수 ---
+  Future<void> _pickImageFromGallery() async {
+    try {
+      // 갤러리 열기
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+
+      if (image != null) {
+        if (!mounted) return;
+        _processImage(image.path); // 선택된 이미지 처리
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('갤러리 오류: $e')));
+    }
+  }
+
+  // --- (공통) 이미지 처리 로직 (촬영 or 갤러리 선택 후) ---
+  void _processImage(String imagePath) {
+    // TODO: 여기서 AI 서버로 이미지를 전송하거나 결과 화면으로 이동합니다.
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('이미지 선택 완료! 경로: $imagePath')));
+
+    // 예: Navigator.push(...)
   }
 
   @override
@@ -88,17 +111,14 @@ class _ScanScreenState extends State<ScanScreen> {
       body: SafeArea(
         child: Stack(
           children: [
-            // --- 카메라 미리보기 ---
-            // 10. FutureBuilder를 사용해 카메라 초기화를 기다립니다.
+            // 1. 카메라 미리보기
             FutureBuilder<void>(
               future: _initializeControllerFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done &&
                     _controller != null) {
-                  // 초기화 완료: 카메라 미리보기를 전체 화면으로 보여줍니다.
                   return Center(child: CameraPreview(_controller!));
                 } else {
-                  // 초기화 중: 로딩 스피너를 보여줍니다.
                   return const Center(
                     child: CircularProgressIndicator(color: Colors.white),
                   );
@@ -106,8 +126,7 @@ class _ScanScreenState extends State<ScanScreen> {
               },
             ),
 
-            // --- UI 오버레이 ---
-            // 뒤로가기 버튼 (상단 좌측)
+            // 2. 상단 뒤로가기 버튼
             Positioned(
               top: 16,
               left: 16,
@@ -117,17 +136,37 @@ class _ScanScreenState extends State<ScanScreen> {
               ),
             ),
 
-            // 촬영 버튼 (하단 중앙)
+            // 3. 하단 컨트롤 영역 (촬영 버튼 + 갤러리 버튼)
             Positioned(
               bottom: 32,
               left: 0,
               right: 0,
-              child: Align(
-                alignment: Alignment.center,
-                child: FloatingActionButton(
-                  backgroundColor: Colors.white,
-                  onPressed: _takePicture, // 11. 촬영 함수 호출
-                  child: const Icon(Icons.camera_alt, color: Colors.black),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween, // 양쪽 끝 정렬
+                  children: [
+                    // (추가됨) 갤러리 버튼 (왼쪽)
+                    IconButton(
+                      onPressed: _pickImageFromGallery,
+                      icon: const Icon(
+                        Icons.photo_library_outlined,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                      tooltip: '갤러리에서 선택',
+                    ),
+
+                    // (기존) 촬영 버튼 (가운데)
+                    FloatingActionButton(
+                      backgroundColor: Colors.white,
+                      onPressed: _takePicture,
+                      child: const Icon(Icons.camera_alt, color: Colors.black),
+                    ),
+
+                    // (공백) 레이아웃 균형을 맞추기 위한 투명 아이콘 (오른쪽)
+                    const SizedBox(width: 32),
+                  ],
                 ),
               ),
             ),
