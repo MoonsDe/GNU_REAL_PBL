@@ -66,11 +66,11 @@ class _MainScreenState extends State<MainScreen> {
         elevation: 0,
         leadingWidth: 0,
         title: const Text(
-          'My Collections',
+          'Re:Cycle',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
-            fontSize: 24,
+            fontSize: 28,
           ),
         ),
         actions: [
@@ -84,7 +84,7 @@ class _MainScreenState extends State<MainScreen> {
         // 부모 스크롤
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         children: [
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
           // --- 1. 날짜 선택기 ---
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -94,7 +94,7 @@ class _MainScreenState extends State<MainScreen> {
               _buildDateChip('20', 'June', isSelected: true),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 28),
           // --- 2. 요약 및 월 선택 ---
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -198,6 +198,7 @@ class _MainScreenState extends State<MainScreen> {
             ],
           ),
           // --- (대체됨) 5. 아이템 목록 GridView ---
+          const SizedBox(height: 32),
           const Text(
             'Items',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
