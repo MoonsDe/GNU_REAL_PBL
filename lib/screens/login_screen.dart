@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 // 1. (오류 수정됨) 'packagepackage:' -> 'package:'
 import 'package:gnu_real_pbl/screens/main_screen.dart';
+import 'package:gnu_real_pbl/screens/signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -122,7 +123,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     TextButton(
                       onPressed: () {
-                        /* TODO: 회원가입 화면 이동 */
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignupScreen(),
+                          ),
+                        );
                       },
                       child: const Text('회원가입'),
                     ),
