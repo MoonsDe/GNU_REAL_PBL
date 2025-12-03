@@ -11,43 +11,22 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // --- 캘린더 격자를 위한 임시 데이터 ---
-  final List<bool> recyclingDays = [
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    true,
+  // --- 월 이름을 영어로 변환하기 위한 리스트 ---
+  final List<String> _monthNames = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ];
 
-  // --- (추가됨) 아이템 그리드를 위한 임시 데이터 ---
-  // 나중에 DB에서 불러올 데이터입니다.
+  // --- 캘린더 격자를 위한 임시 데이터 ---
+  final List<bool> recyclingDays = [
+    false, false, false, true, true, true, true,
+    true, false, false, true, true, true, true,
+    true, true, true, true, true, true, true,
+    true, true, true, true, true, true, true,
+    false, false, true,
+  ];
+
+  // --- 아이템 그리드를 위한 임시 데이터 ---
   final List<Map<String, dynamic>> recycledItems = [
     {'name': 'Plastic Cup', 'icon': Icons.local_cafe_outlined},
     {'name': 'Plastic Bag', 'icon': Icons.shopping_bag_outlined},
@@ -59,6 +38,11 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // --- 실시간 날짜 계산 로직 ---
+    final now = DateTime.now(); // 오늘
+    final yesterday = now.subtract(const Duration(days: 1)); // 어제
+    final tomorrow = now.add(const Duration(days: 1)); // 내일
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -76,25 +60,43 @@ class _MainScreenState extends State<MainScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.more_vert, color: Colors.black),
+            iconSize: 30.0,
             onPressed: () {},
           ),
         ],
       ),
       body: ListView(
-        // 부모 스크롤
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         children: [
           const SizedBox(height: 4),
-          // --- 1. 날짜 선택기 ---
+          
+          // --- 1. 실시간 날짜 선택기 ---
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildDateChip('18', 'June', isSelected: false),
-              _buildDateChip('19', 'June', isSelected: false),
-              _buildDateChip('20', 'June', isSelected: true),
+              // 어제
+              _buildDateChip(
+                yesterday.day.toString(),
+                _monthNames[yesterday.month - 1],
+                isSelected: false,
+              ),
+              // 오늘 (선택됨)
+              _buildDateChip(
+                now.day.toString(),
+                _monthNames[now.month - 1],
+                isSelected: true,
+              ),
+              // 내일
+              _buildDateChip(
+                tomorrow.day.toString(),
+                _monthNames[tomorrow.month - 1],
+                isSelected: false,
+              ),
             ],
           ),
+          
           const SizedBox(height: 28),
+          
           // --- 2. 요약 및 월 선택 ---
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -112,16 +114,19 @@ class _MainScreenState extends State<MainScreen> {
                   border: Border.all(color: Colors.grey[300]!),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Text('3월'),
-                    Icon(Icons.arrow_drop_down, color: Colors.grey),
+                    // 현재 월 표시
+                    Text('${now.month}월'), 
+                    const Icon(Icons.arrow_drop_down, color: Colors.grey),
                   ],
                 ),
               ),
             ],
           ),
+          
           const SizedBox(height: 16),
+          
           // --- 3. 재활용 캘린더 GridView ---
           Container(
             padding: const EdgeInsets.all(16.0),
@@ -144,7 +149,9 @@ class _MainScreenState extends State<MainScreen> {
               },
             ),
           ),
+          
           const SizedBox(height: 24),
+          
           // --- 4. 스캔 및 추가 버튼 ---
           Row(
             children: [
@@ -165,7 +172,6 @@ class _MainScreenState extends State<MainScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  // (수정됨) 여기는 비워둡니다.
                   onPressed: () {
                     // TODO: "Add More" 기능 나중에 구현
                   },
@@ -184,7 +190,6 @@ class _MainScreenState extends State<MainScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  // (수정됨) ScanScreen으로 가는 코드를 이쪽으로 옮깁니다.
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -197,7 +202,8 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ],
           ),
-          // --- (대체됨) 5. 아이템 목록 GridView ---
+          
+          // --- 5. 아이템 목록 GridView ---
           const SizedBox(height: 32),
           const Text(
             'Items',
@@ -205,30 +211,26 @@ class _MainScreenState extends State<MainScreen> {
           ),
           const SizedBox(height: 16),
           GridView.builder(
-            // GridView가 부모 ListView 안에서 스크롤되도록 설정
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3, // 1. 한 줄에 3개씩
-              crossAxisSpacing: 12, // 가로 아이템 간격
-              mainAxisSpacing: 12, // 세로 아이템 간격
-              childAspectRatio: 0.9, // 아이템의 (가로 / 세로) 비율. 1.0은 정사각형.
+              crossAxisCount: 3,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.9,
             ),
-            itemCount: recycledItems.length, // DB에서 가져온 아이템 개수
+            itemCount: recycledItems.length,
             itemBuilder: (context, index) {
               final item = recycledItems[index];
-              // _buildItemCard 헬퍼 위젯을 재사용
               return _buildItemCard(item['name'], item['icon']);
             },
           ),
-          const SizedBox(height: 32), // 하단 여백 추가
-          // --- --------------------------------- ---
+          const SizedBox(height: 32),
         ],
       ),
+      
       // --- 6. 하단 네비게이션 바 및 중앙 버튼 ---
       floatingActionButton: FloatingActionButton(
-        // (수정됨) ScanScreen으로 이동하는 코드를 여기에 추가합니다.
         onPressed: () {
           Navigator.push(
             context,
@@ -249,7 +251,7 @@ class _MainScreenState extends State<MainScreen> {
           children: [
             IconButton(icon: const Icon(Icons.home_outlined), onPressed: () {}),
             IconButton(
-              icon: const Icon(Icons.bar_chart_outlined),
+              icon: const Icon(Icons.search), // 돋보기 아이콘
               onPressed: () {},
             ),
             const SizedBox(width: 48),
@@ -293,9 +295,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  // --- (수정됨) 아이템 카드 헬퍼 위젯 ---
   Widget _buildItemCard(String itemName, IconData icon) {
-    // GridView가 크기와 위치를 제어하므로 width, margin 속성을 제거합니다.
     return Container(
       padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
@@ -303,16 +303,14 @@ class _MainScreenState extends State<MainScreen> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
-        // 3. Column의 mainAxisAlignment: MainAxisAlignment.center
-        //    이것이 아이콘과 텍스트를 카드 *내부*에서 세로로 가운데 정렬시킵니다.
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, size: 40, color: Colors.grey[600]),
           const SizedBox(height: 8),
           Text(
             itemName,
-            textAlign: TextAlign.center, // 텍스트도 가운데 정렬
-            overflow: TextOverflow.ellipsis, // 이름이 길면 ...으로 표시
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
