@@ -2,7 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:image_picker/image_picker.dart'; // 1. image_picker import
+import 'package:image_picker/image_picker.dart';
+import 'package:dio/dio.dart'; // 1. Dio 패키지 추가
+import 'package:gnu_real_pbl/api/api_config.dart'; // 2. API 설정 파일 추가
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -14,9 +16,14 @@ class ScanScreen extends StatefulWidget {
 class _ScanScreenState extends State<ScanScreen> {
   CameraController? _controller;
   Future<void>? _initializeControllerFuture;
-
-  // 2. ImagePicker 객체 생성
   final ImagePicker _picker = ImagePicker();
+
+  // 3. Dio 객체 생성 (이미지 업로드는 시간이 걸릴 수 있어 타임아웃을 넉넉히 줍니다)
+  final Dio dio = Dio(BaseOptions(
+    baseUrl: ApiConfig.baseUrl,
+    connectTimeout: const Duration(seconds: 10),
+    receiveTimeout: const Duration(seconds: 10),
+  ));
 
   @override
   void initState() {
@@ -27,7 +34,6 @@ class _ScanScreenState extends State<ScanScreen> {
   Future<void> _initializeCamera() async {
     try {
       final cameras = await availableCameras();
-
       if (cameras.isEmpty) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -38,20 +44,16 @@ class _ScanScreenState extends State<ScanScreen> {
         });
         return;
       }
-
       final firstCamera = cameras.first;
-
       _controller = CameraController(firstCamera, ResolutionPreset.medium);
-
       _initializeControllerFuture = _controller!.initialize();
-
       if (!mounted) return;
       setState(() {});
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('카메라 초기화 오류: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('카메라 초기화 오류: $e')),
+      );
     }
   }
 
@@ -61,46 +63,92 @@ class _ScanScreenState extends State<ScanScreen> {
     super.dispose();
   }
 
-  // --- (기존) 카메라 촬영 함수 ---
   Future<void> _takePicture() async {
     try {
       await _initializeControllerFuture;
       final image = await _controller!.takePicture();
-
       if (!mounted) return;
-      _processImage(image.path); // 촬영된 이미지 처리
+      _processImage(image.path);
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('촬영 오류: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('촬영 오류: $e')),
+      );
     }
   }
 
-  // --- (추가됨) 갤러리에서 사진 가져오는 함수 ---
   Future<void> _pickImageFromGallery() async {
     try {
-      // 갤러리 열기
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-
       if (image != null) {
         if (!mounted) return;
-        _processImage(image.path); // 선택된 이미지 처리
+        _processImage(image.path);
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('갤러리 오류: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('갤러리 오류: $e')),
+      );
     }
   }
 
-  // --- (공통) 이미지 처리 로직 (촬영 or 갤러리 선택 후) ---
-  void _processImage(String imagePath) {
-    // TODO: 여기서 AI 서버로 이미지를 전송하거나 결과 화면으로 이동합니다.
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('이미지 선택 완료! 경로: $imagePath')));
+  // --- [수정됨] 이미지를 백엔드로 전송하는 함수 ---
+  Future<void> _processImage(String imagePath) async {
+    // 1. 로딩 표시
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('이미지를 분석 중입니다...')),
+    );
 
-    // 예: Navigator.push(...)
+    try {
+      // 2. 전송할 데이터 준비 (FormData)
+      // 파일 이름 추출 (예: image_picker_123.jpg)
+      String fileName = imagePath.split('/').last;
+
+      FormData formData = FormData.fromMap({
+        // [수정됨] 백엔드 요청에 맞춰 키 이름을 'image'로 설정
+        'image': await MultipartFile.fromFile(imagePath, filename: fileName),
+      });
+
+      // 3. 서버로 전송 (POST)
+      // [수정됨] 백엔드 요청에 맞춰 엔드포인트를 '/api/ai/classify-image'로 설정
+      final response = await dio.post(
+        '/api/ai/classify-image', 
+        data: formData,
+      );
+
+      if (!mounted) return;
+
+      // 4. 결과 처리
+      if (response.statusCode == 200) {
+        // 성공 시
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ 분석 완료! 결과 화면으로 이동합니다.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        
+        // TODO: 분석 결과(response.data)를 가지고 결과 화면으로 이동
+        // Navigator.push(context, MaterialPageRoute(builder: (_) => ResultScreen(data: response.data)));
+        
+        // (임시) 응답 데이터 확인용 출력
+        print('서버 응답: ${response.data}');
+
+      } else {
+        // 실패 시
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('분석 실패: 서버 오류')),
+        );
+      }
+
+    } catch (e) {
+      // 에러 발생 시
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('전송 오류: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -110,7 +158,6 @@ class _ScanScreenState extends State<ScanScreen> {
       body: SafeArea(
         child: Stack(
           children: [
-            // 1. 카메라 미리보기
             FutureBuilder<void>(
               future: _initializeControllerFuture,
               builder: (context, snapshot) {
@@ -124,8 +171,6 @@ class _ScanScreenState extends State<ScanScreen> {
                 }
               },
             ),
-
-            // 2. 상단 뒤로가기 버튼
             Positioned(
               top: 16,
               left: 16,
@@ -134,8 +179,6 @@ class _ScanScreenState extends State<ScanScreen> {
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ),
-
-            // 3. 하단 컨트롤 영역 (촬영 버튼 + 갤러리 버튼)
             Positioned(
               bottom: 32,
               left: 0,
@@ -143,9 +186,8 @@ class _ScanScreenState extends State<ScanScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween, // 양쪽 끝 정렬
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // (추가됨) 갤러리 버튼 (왼쪽)
                     IconButton(
                       onPressed: _pickImageFromGallery,
                       icon: const Icon(
@@ -155,15 +197,11 @@ class _ScanScreenState extends State<ScanScreen> {
                       ),
                       tooltip: '갤러리에서 선택',
                     ),
-
-                    // (기존) 촬영 버튼 (가운데)
                     FloatingActionButton(
                       backgroundColor: Colors.white,
                       onPressed: _takePicture,
                       child: const Icon(Icons.camera_alt, color: Colors.black),
                     ),
-
-                    // (공백) 레이아웃 균형을 맞추기 위한 투명 아이콘 (오른쪽)
                     const SizedBox(width: 32),
                   ],
                 ),

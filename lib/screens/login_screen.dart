@@ -26,9 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // --- 서버 연결 테스트 함수 ---
   Future<void> _testConnection() async {
     try {
-      // 서버로 GET 요청을 보냅니다.
       final response = await dio.get('/');
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -51,6 +49,8 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // --- (보존용) 실제 로그인 함수 ---
+  // 나중에 서버 연동이 필요하면 이 함수를 다시 연결하세요.
   Future<void> _login() async {
     try {
       final response = await dio.post(
@@ -95,8 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      // --- [수정됨] 테스트용 플로팅 버튼 추가 ---
-      // 화면 오른쪽 아래에 노란색 와이파이 버튼이 생깁니다.
+      // --- 테스트용 플로팅 버튼 ---
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _testConnection,
         backgroundColor: Colors.amber,
@@ -152,6 +151,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
+
+                // --- 로그인 버튼 ---
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
@@ -161,7 +162,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  onPressed: _login,
+                  // [수정됨] _login 함수 대신 바로 화면 이동 코드를 넣었습니다.
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                          builder: (context) => const MainScreen()),
+                    );
+                  },
                   child: const Text(
                     '로그인',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
