@@ -1,9 +1,10 @@
 // lib/screens/login_screen.dart
 
 import 'package:flutter/material.dart';
-// 1. (오류 수정됨) 'packagepackage:' -> 'package:'
+import 'package:dio/dio.dart';
 import 'package:gnu_real_pbl/screens/main_screen.dart';
 import 'package:gnu_real_pbl/screens/signup_screen.dart';
+import 'package:gnu_real_pbl/api/api_config.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,34 +14,96 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // 텍스트 필드를 제어하기 위한 컨트롤러
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  final Dio dio = Dio(BaseOptions(
+    baseUrl: ApiConfig.baseUrl,
+    connectTimeout: const Duration(seconds: 5),
+    receiveTimeout: const Duration(seconds: 3),
+  ));
+
+  // --- 서버 연결 테스트 함수 ---
+  Future<void> _testConnection() async {
+    try {
+      // 서버로 GET 요청을 보냅니다.
+      final response = await dio.get('/');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ 연결 성공! (상태 코드: ${response.statusCode})'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ 연결 실패: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _login() async {
+    try {
+      final response = await dio.post(
+        '/login',
+        data: {
+          'email': _emailController.text,
+          'password': _passwordController.text,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const MainScreen()),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('로그인 실패: 아이디나 비밀번호를 확인하세요.')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('서버 통신 오류: $e')),
+        );
+      }
+    }
+  }
+
   @override
   void dispose() {
-    // 위젯이 종료될 때 컨트롤러도 정리합니다.
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  void _login() {
-    // TODO: 여기에 실제 이메일/비밀번호 로그인 로직을 구현합니다.
-    // (예: Firebase Auth, 백엔드 API 호출)
-
-    // 지금은 로그인에 성공했다고 가정하고,
-    // 현재 화면을 닫고 MainScreen으로 이동시킵니다.
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const MainScreen()),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // 키보드가 올라올 때 UI가 밀려 올라가도록
+
+      // --- [수정됨] 테스트용 플로팅 버튼 추가 ---
+      // 화면 오른쪽 아래에 노란색 와이파이 버튼이 생깁니다.
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _testConnection,
+        backgroundColor: Colors.amber,
+        icon: const Icon(Icons.wifi, color: Colors.black),
+        label: const Text('서버 테스트', style: TextStyle(color: Colors.black)),
+      ),
+
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -49,15 +112,12 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // 1. 앱 로고 (메인 화면의 초록색과 통일)
                 const Icon(
-                  Icons.recycling_rounded, // Re:Cycle 앱의 아이덴티티
+                  Icons.recycling_rounded,
                   size: 80,
                   color: Colors.green,
                 ),
                 const SizedBox(height: 16),
-
-                // 2. 앱 이름
                 const Text(
                   'Re:Cycle',
                   textAlign: TextAlign.center,
@@ -68,9 +128,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 48),
-
-                // 3. 이메일 텍스트 필드
-                // (메인 화면의 버튼/카드와 동일한 둥근 모서리)
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -83,11 +140,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // 4. 비밀번호 텍스트 필드
                 TextField(
                   controller: _passwordController,
-                  obscureText: true, // 비밀번호 숨기기
+                  obscureText: true,
                   decoration: InputDecoration(
                     labelText: '비밀번호',
                     prefixIcon: const Icon(Icons.lock_outlined),
@@ -97,27 +152,22 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-
-                // 5. 로그인 버튼
-                // (메인 화면의 'Scan and collect' 버튼과 동일한 스타일)
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green, // 초록색 배경
-                    foregroundColor: Colors.white, // 흰색 글씨
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  onPressed: _login, // _login 함수 호출
+                  onPressed: _login,
                   child: const Text(
                     '로그인',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // 6. 회원가입 / 비밀번호 찾기 (텍스트 버튼)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -135,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const Text('|', style: TextStyle(color: Colors.grey)),
                     TextButton(
                       onPressed: () {
-                        /* TODO: 비밀번호 찾기 */
+                        // TODO: 비밀번호 찾기
                       },
                       child: const Text('비밀번호 찾기'),
                     ),

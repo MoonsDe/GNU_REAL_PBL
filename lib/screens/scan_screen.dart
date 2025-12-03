@@ -1,6 +1,5 @@
 // lib/screens/scan_screen.dart
 
-import 'dart:io'; // File 객체 사용을 위해 필요
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart'; // 1. image_picker import
