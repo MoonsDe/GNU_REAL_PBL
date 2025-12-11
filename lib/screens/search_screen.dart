@@ -17,12 +17,16 @@ class _SearchScreenState extends State<SearchScreen> {
 
   final List<String> _categories = [
     '전체',
-    '종이류',
-    '종이팩',
-    '캔류',
-    '유리병',
+    '종이',
+    '일반쓰레기',
+    '캔',
+    '유리',
     '플라스틱',
-    '스티로폼'
+    '비닐',
+    '스티로폼',
+    '의류',
+    '유해폐기물',
+    '기타'
   ];
 
   @override

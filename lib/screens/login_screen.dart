@@ -49,7 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // --- 실제 로그인 함수 (현재는 사용 안 함, 보존용) ---
   Future<void> _login() async {
     try {
       final response = await dio.post(
