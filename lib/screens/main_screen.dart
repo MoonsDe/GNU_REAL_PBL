@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:gnu_real_pbl/screens/scan_screen.dart';
+import 'package:gnu_real_pbl/screens/search_screen.dart'; // 검색 화면 import
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -13,17 +14,53 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   // --- 월 이름을 영어로 변환하기 위한 리스트 ---
   final List<String> _monthNames = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
   ];
 
   // --- 캘린더 격자를 위한 임시 데이터 ---
   final List<bool> recyclingDays = [
-    false, false, false, true, true, true, true,
-    true, false, false, true, true, true, true,
-    true, true, true, true, true, true, true,
-    true, true, true, true, true, true, true,
-    false, false, true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true,
   ];
 
   // --- 아이템 그리드를 위한 임시 데이터 ---
@@ -69,7 +106,7 @@ class _MainScreenState extends State<MainScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         children: [
           const SizedBox(height: 4),
-          
+
           // --- 1. 실시간 날짜 선택기 ---
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -94,9 +131,9 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 28),
-          
+
           // --- 2. 요약 및 월 선택 ---
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -117,16 +154,16 @@ class _MainScreenState extends State<MainScreen> {
                 child: Row(
                   children: [
                     // 현재 월 표시
-                    Text('${now.month}월'), 
+                    Text('${now.month}월'),
                     const Icon(Icons.arrow_drop_down, color: Colors.grey),
                   ],
                 ),
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // --- 3. 재활용 캘린더 GridView ---
           Container(
             padding: const EdgeInsets.all(16.0),
@@ -149,9 +186,9 @@ class _MainScreenState extends State<MainScreen> {
               },
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // --- 4. 스캔 및 추가 버튼 ---
           Row(
             children: [
@@ -202,7 +239,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ],
           ),
-          
+
           // --- 5. 아이템 목록 GridView ---
           const SizedBox(height: 32),
           const Text(
@@ -228,7 +265,7 @@ class _MainScreenState extends State<MainScreen> {
           const SizedBox(height: 32),
         ],
       ),
-      
+
       // --- 6. 하단 네비게이션 바 및 중앙 버튼 ---
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -250,10 +287,18 @@ class _MainScreenState extends State<MainScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(icon: const Icon(Icons.home_outlined), onPressed: () {}),
+
+            // --- 돋보기 버튼 (검색 화면 연결) ---
             IconButton(
-              icon: const Icon(Icons.search), // 돋보기 아이콘
-              onPressed: () {},
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SearchScreen()),
+                );
+              },
             ),
+
             const SizedBox(width: 48),
             IconButton(
               icon: const Icon(Icons.bookmark_border_outlined),

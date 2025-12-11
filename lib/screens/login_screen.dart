@@ -23,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
     receiveTimeout: const Duration(seconds: 3),
   ));
 
-  // --- 서버 연결 테스트 함수 ---
+  // --- 서버 연결 테스트 함수 (유지) ---
   Future<void> _testConnection() async {
     try {
       final response = await dio.get('/');
@@ -49,8 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // --- (보존용) 실제 로그인 함수 ---
-  // 나중에 서버 연동이 필요하면 이 함수를 다시 연결하세요.
   Future<void> _login() async {
     try {
       final response = await dio.post(
@@ -63,7 +61,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (response.statusCode == 200) {
         if (mounted) {
-          Navigator.of(context).pushReplacement(
+          Navigator.pushReplacement(
+            context,
             MaterialPageRoute(builder: (context) => const MainScreen()),
           );
         }
@@ -162,11 +161,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  // [수정됨] _login 함수 대신 바로 화면 이동 코드를 넣었습니다.
+                  // [수정됨] Navigator.push를 사용하여 즉시 이동
                   onPressed: () {
-                    Navigator.of(context).pushReplacement(
+                    Navigator.push(
+                      context,
                       MaterialPageRoute(
-                          builder: (context) => const MainScreen()),
+                        builder: (context) => const MainScreen(),
+                      ),
                     );
                   },
                   child: const Text(
