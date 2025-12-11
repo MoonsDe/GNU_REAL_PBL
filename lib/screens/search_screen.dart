@@ -12,11 +12,9 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  // 검색어와 선택된 카테고리 상태 관리
   String _searchText = '';
   String _selectedCategory = '전체';
 
-  // 카테고리 목록 (데이터에서 자동으로 추출하거나 직접 지정 가능)
   final List<String> _categories = [
     '전체',
     '종이류',

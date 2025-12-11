@@ -1,11 +1,11 @@
 // lib/models/recycling_item.dart
 
 class RecyclingItem {
-  final String name;          // 품목명 (ITEM_NAME)
-  final String bigCategory;   // 대분류 (BIG_CATEGORY)
-  final String category;      // 소분류 (CATEGORY)
-  final String method;        // 배출 방법 (DISPOSAL_METHOD)
-  final String notes;         // 주의사항 (NOTES)
+  final String name; // 품목명 (ITEM_NAME)
+  final String bigCategory; // 대분류 (BIG_CATEGORY)
+  final String category; // 소분류 (CATEGORY)
+  final String method; // 배출 방법 (DISPOSAL_METHOD)
+  final String notes; // 주의사항 (NOTES)
 
   RecyclingItem({
     required this.name,
@@ -46,5 +46,12 @@ final List<RecyclingItem> recyclingData = [
     method: '테이프와 운송장 스티커를 완전히 제거하고 접어서 배출합니다.',
     notes: '이물질이 묻은 상자는 종량제 봉투에 버립니다.',
   ),
-  // ... 여기에 데이터를 계속 추가하시면 됩니다.
+  RecyclingItem(
+    name: '철캔',
+    bigCategory: '캔',
+    category: '금속캔',
+    method:
+        '1. 내용물을 비우고 물로 헹구는 등 이물질을 제거하여 배출하세요. \n\n 2. 담배꽁초 등 이물질을 넣지 않고 배출하세요. \n\n 3. 플라스틱 뚜껑 등 금속캔과 다른 재질은 제거한 후 배출하세요.',
+    notes: '이물질이 묻은 상자는 종량제 봉투에 버립니다.',
+  ),
 ];
