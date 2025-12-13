@@ -66,26 +66,33 @@ class _SignupScreenState extends State<SignupScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // [수정됨] 상단 여백 추가: 이 값을 조절하여 전체 내용을 위아래로 이동시킬 수 있습니다.
-                // 숫자를 줄이면 더 위로, 늘리면 더 아래로 내려갑니다.
-                const SizedBox(height: 10),
-
-                // 1. 타이틀
-                const Text(
-                  '회원가입',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                // [수정됨] Transform.translate를 사용하여 강제로 위로 끌어올립니다.
+                // dy 값을 -20, -30 등으로 조절하여 원하는 만큼 올릴 수 있습니다.
+                Transform.translate(
+                  offset: const Offset(0, -30), // 위로 30픽셀 이동
+                  child: Column(
+                    children: const [
+                      // 1. 타이틀
+                      Text(
+                        '회원가입',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Re:Cycle과 함께 지구를 지켜요!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Re:Cycle과 함께 지구를 지켜요!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
+                
+                // [수정됨] 타이틀과 입력창 사이의 간격을 요청하신 대로 48로 유지합니다.
                 const SizedBox(height: 48),
 
                 // 2. 닉네임 입력

@@ -23,32 +23,6 @@ class _LoginScreenState extends State<LoginScreen> {
     receiveTimeout: const Duration(seconds: 3),
   ));
 
-  // --- 서버 연결 테스트 함수 (유지) ---
-  Future<void> _testConnection() async {
-    try {
-      final response = await dio.get('/');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('✅ 연결 성공! (상태 코드: ${response.statusCode})'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ 연결 실패: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
-
   Future<void> _login() async {
     try {
       final response = await dio.post(
@@ -93,15 +67,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
-      // --- 테스트용 플로팅 버튼 ---
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _testConnection,
-        backgroundColor: Colors.amber,
-        icon: const Icon(Icons.wifi, color: Colors.black),
-        label: const Text('서버 테스트', style: TextStyle(color: Colors.black)),
-      ),
-
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
