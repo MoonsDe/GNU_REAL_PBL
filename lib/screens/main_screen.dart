@@ -33,7 +33,8 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leadingWidth: 0,
+        // [수정됨] 뒤로가기 버튼 제거 및 자동 생성 방지
+        automaticallyImplyLeading: false, 
         title: const Text(
           'Re:Cycle',
           style: TextStyle(
@@ -219,7 +220,7 @@ class _MainScreenState extends State<MainScreen> {
                 child: OutlinedButton.icon(
                   icon:
                       const Icon(Icons.add_circle_outline, color: Colors.green),
-                  label: const Text('Search More', // 버튼 텍스트 변경 확인
+                  label: const Text('Search More',
                       style: TextStyle(color: Colors.black)),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -228,7 +229,6 @@ class _MainScreenState extends State<MainScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  // [수정됨] SearchScreen으로 이동하도록 변경
                   onPressed: () {
                     Navigator.push(
                       context,
