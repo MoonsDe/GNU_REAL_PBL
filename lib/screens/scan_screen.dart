@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart'; // 1. Dio 패키지 추가
 import 'package:gnu_real_pbl/api/api_config.dart'; // 2. API 설정 파일 추가
+import 'package:gnu_real_pbl/screens/result_screen.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -92,55 +93,41 @@ class _ScanScreenState extends State<ScanScreen> {
 
   // --- [수정됨] 이미지를 백엔드로 전송하는 함수 ---
   Future<void> _processImage(String imagePath) async {
-    // 1. 로딩 표시
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('이미지를 분석 중입니다...')),
     );
 
     try {
-      // 2. 전송할 데이터 준비 (FormData)
-      // 파일 이름 추출 (예: image_picker_123.jpg)
       String fileName = imagePath.split('/').last;
-
       FormData formData = FormData.fromMap({
-        // [수정됨] 백엔드 요청에 맞춰 키 이름을 'image'로 설정
         'image': await MultipartFile.fromFile(imagePath, filename: fileName),
       });
 
-      // 3. 서버로 전송 (POST)
-      // [수정됨] 백엔드 요청에 맞춰 엔드포인트를 '/api/ai/classify-image'로 설정
       final response = await dio.post(
-        '/api/ai/classify-image', 
+        '/api/ai/classify-image',
         data: formData,
       );
 
       if (!mounted) return;
 
-      // 4. 결과 처리
       if (response.statusCode == 200) {
-        // 성공 시
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ 분석 완료! 결과 화면으로 이동합니다.'),
-            backgroundColor: Colors.green,
+        // [수정됨] 성공 시 결과 화면(ResultScreen)으로 이동
+        // response.data가 백엔드에서 준 JSON ({id: 2, name: ...}) 입니다.
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ResultScreen(
+              imagePath: imagePath, // 찍은 사진 경로 전달
+              resultData: response.data, // 서버 응답 데이터 전달
+            ),
           ),
         );
-        
-        // TODO: 분석 결과(response.data)를 가지고 결과 화면으로 이동
-        // Navigator.push(context, MaterialPageRoute(builder: (_) => ResultScreen(data: response.data)));
-        
-        // (임시) 응답 데이터 확인용 출력
-        print('서버 응답: ${response.data}');
-
       } else {
-        // 실패 시
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('분석 실패: 서버 오류')),
         );
       }
-
     } catch (e) {
-      // 에러 발생 시
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
