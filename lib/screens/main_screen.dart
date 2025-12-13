@@ -34,7 +34,7 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         // [수정됨] 뒤로가기 버튼 제거 및 자동 생성 방지
-        automaticallyImplyLeading: false, 
+        automaticallyImplyLeading: false,
         title: const Text(
           'Re:Cycle',
           style: TextStyle(
@@ -104,7 +104,7 @@ class _MainScreenState extends State<MainScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                '7 items recycled',
+                '분리수거 7개 완료!',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
               Container(
@@ -220,7 +220,7 @@ class _MainScreenState extends State<MainScreen> {
                 child: OutlinedButton.icon(
                   icon:
                       const Icon(Icons.add_circle_outline, color: Colors.green),
-                  label: const Text('Search More',
+                  label: const Text('더 찾아보기',
                       style: TextStyle(color: Colors.black)),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -242,7 +242,7 @@ class _MainScreenState extends State<MainScreen> {
               Expanded(
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.qr_code_scanner_rounded),
-                  label: const Text('Scan and collect'),
+                  label: const Text('스캔하기'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
@@ -270,13 +270,12 @@ class _MainScreenState extends State<MainScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Recent Scans',
+                '최근 스캔 기록',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               TextButton(
                 onPressed: () {},
-                child:
-                    const Text('See all', style: TextStyle(color: Colors.grey)),
+                child: const Text('전체보기', style: TextStyle(color: Colors.grey)),
               ),
             ],
           ),
