@@ -12,65 +12,13 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // --- 월 이름을 영어로 변환하기 위한 리스트 ---
-  final List<String> _monthNames = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec'
-  ];
-
-  // --- 캘린더 격자를 위한 임시 데이터 ---
-  final List<bool> recyclingDays = [
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    true,
-  ];
-
-  // --- 아이템 그리드를 위한 임시 데이터 ---
-  final List<Map<String, dynamic>> recycledItems = [
-    {'name': 'Plastic Cup', 'icon': Icons.local_cafe_outlined},
-    {'name': 'Plastic Bag', 'icon': Icons.shopping_bag_outlined},
-    {'name': 'Water Bottle', 'icon': Icons.water_drop_outlined},
-    {'name': 'Cardboard Box', 'icon': Icons.inventory_2_outlined},
-    {'name': 'Glass Jar', 'icon': Icons.wine_bar_outlined},
-    {'name': 'Soda Can', 'icon': Icons.local_drink_outlined},
+  // --- 최근 스캔 기록 데이터 ---
+  final List<Map<String, dynamic>> recentScans = [
+    {'name': '투명 페트병', 'icon': Icons.local_drink_outlined, 'date': '오늘'},
+    {'name': '종이 상자', 'icon': Icons.inventory_2_outlined, 'date': '오늘'},
+    {'name': '알루미늄 캔', 'icon': Icons.local_drink_rounded, 'date': '어제'},
+    {'name': '유리병', 'icon': Icons.wine_bar_outlined, 'date': '3일 전'},
+    {'name': '플라스틱 컵', 'icon': Icons.local_cafe_outlined, 'date': '1주 전'},
   ];
 
   @override
@@ -106,54 +54,67 @@ class _MainScreenState extends State<MainScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         children: [
           const SizedBox(height: 4),
+          const SizedBox(height: 24),
 
-          // --- 1. 실시간 날짜 선택기 ---
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              // 어제
-              _buildDateChip(
-                yesterday.day.toString(),
-                _monthNames[yesterday.month - 1],
-                isSelected: false,
-              ),
-              // 오늘 (선택됨)
-              _buildDateChip(
-                now.day.toString(),
-                _monthNames[now.month - 1],
-                isSelected: true,
-              ),
-              // 내일
-              _buildDateChip(
-                tomorrow.day.toString(),
-                _monthNames[tomorrow.month - 1],
-                isSelected: false,
-              ),
-            ],
+          // --- 2. 오늘의 환경 팁 카드 ---
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.lightbulb_outline,
+                    color: Colors.green, size: 28),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '오늘의 환경 Tip',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        '다 쓴 치약 튜브는 잘라서 씻어 배출해요!',
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
 
-          const SizedBox(height: 28),
+          const SizedBox(height: 24),
 
-          // --- 2. 요약 및 월 선택 ---
+          // --- 3. 요약 및 월 선택 ---
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                '12 items recycled',
+                '7 items recycled',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey[300]!),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
-                    // 현재 월 표시
                     Text('${now.month}월'),
                     const Icon(Icons.arrow_drop_down, color: Colors.grey),
                   ],
@@ -164,44 +125,102 @@ class _MainScreenState extends State<MainScreen> {
 
           const SizedBox(height: 16),
 
-          // --- 3. 재활용 캘린더 GridView ---
+          // --- 4. 에코 트리 & 진행률 카드 ---
           Container(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.grey[200]!),
-            ),
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 7,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
+              gradient: const LinearGradient(
+                colors: [Color(0xFFE8F5E9), Colors.white],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
-              itemCount: recyclingDays.length,
-              itemBuilder: (context, index) {
-                return _buildCalendarCell(isRecycled: recyclingDays[index]);
-              },
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 5,
+                        offset: Offset(0, 2),
+                      )
+                    ],
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.park, size: 50, color: Colors.green),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '이번 달 목표 달성을 위해!',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        '조금만 더 힘내세요 🌱',
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 12),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: const LinearProgressIndicator(
+                          value: 0.7,
+                          minHeight: 10,
+                          backgroundColor: Color(0xFFE0E0E0),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.green),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          '70%',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
 
           const SizedBox(height: 24),
 
-          // --- 4. 스캔 및 추가 버튼 ---
+          // --- 5. 스캔 및 추가 버튼 ---
           Row(
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  icon: const Icon(
-                    Icons.add_circle_outline,
-                    color: Colors.green,
-                  ),
-                  label: const Text(
-                    'Add More',
-                    style: TextStyle(color: Colors.black),
-                  ),
+                  icon:
+                      const Icon(Icons.add_circle_outline, color: Colors.green),
+                  label: const Text('Search More', // 버튼 텍스트 변경 확인
+                      style: TextStyle(color: Colors.black)),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     side: BorderSide(color: Colors.grey[300]!, width: 1.5),
@@ -209,8 +228,13 @@ class _MainScreenState extends State<MainScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
+                  // [수정됨] SearchScreen으로 이동하도록 변경
                   onPressed: () {
-                    // TODO: "Add More" 기능 나중에 구현
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const SearchScreen()),
+                    );
                   },
                 ),
               ),
@@ -231,8 +255,7 @@ class _MainScreenState extends State<MainScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const ScanScreen(),
-                      ),
+                          builder: (context) => const ScanScreen()),
                     );
                   },
                 ),
@@ -240,33 +263,46 @@ class _MainScreenState extends State<MainScreen> {
             ],
           ),
 
-          // --- 5. 아이템 목록 GridView ---
           const SizedBox(height: 32),
-          const Text(
-            'Items',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+
+          // --- 6. 최근 스캔 기록 (가로 스크롤) ---
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Recent Scans',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              TextButton(
+                onPressed: () {},
+                child:
+                    const Text('See all', style: TextStyle(color: Colors.grey)),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.9,
+          const SizedBox(height: 8),
+
+          SizedBox(
+            height: 140, // 카드 높이
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: recentScans.length,
+              itemBuilder: (context, index) {
+                final item = recentScans[index];
+                return _buildRecentScanCard(
+                  item['name'],
+                  item['icon'],
+                  item['date'],
+                );
+              },
             ),
-            itemCount: recycledItems.length,
-            itemBuilder: (context, index) {
-              final item = recycledItems[index];
-              return _buildItemCard(item['name'], item['icon']);
-            },
           ),
+
           const SizedBox(height: 32),
         ],
       ),
 
-      // --- 6. 하단 네비게이션 바 및 중앙 버튼 ---
+      // --- FAB 및 하단 바 ---
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -287,8 +323,6 @@ class _MainScreenState extends State<MainScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(icon: const Icon(Icons.home_outlined), onPressed: () {}),
-
-            // --- 돋보기 버튼 (검색 화면 연결) ---
             IconButton(
               icon: const Icon(Icons.search),
               onPressed: () {
@@ -298,16 +332,12 @@ class _MainScreenState extends State<MainScreen> {
                 );
               },
             ),
-
             const SizedBox(width: 48),
             IconButton(
-              icon: const Icon(Icons.bookmark_border_outlined),
-              onPressed: () {},
-            ),
+                icon: const Icon(Icons.bookmark_border_outlined),
+                onPressed: () {}),
             IconButton(
-              icon: const Icon(Icons.person_outline),
-              onPressed: () {},
-            ),
+                icon: const Icon(Icons.person_outline), onPressed: () {}),
           ],
         ),
       ),
@@ -340,33 +370,54 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget _buildItemCard(String itemName, IconData icon) {
+  Widget _buildRecentScanCard(String itemName, IconData icon, String date) {
     return Container(
-      padding: const EdgeInsets.all(8.0),
+      width: 120,
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 40, color: Colors.grey[600]),
-          const SizedBox(height: 8),
-          Text(
-            itemName,
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[200]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildCalendarCell({required bool isRecycled}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isRecycled ? const Color(0xFFAEE5C0) : const Color(0xFFECECEC),
-        borderRadius: BorderRadius.circular(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 28, color: Colors.green),
+          ),
+          const Spacer(),
+          Text(
+            itemName,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            date,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[500],
+            ),
+          ),
+        ],
       ),
     );
   }
