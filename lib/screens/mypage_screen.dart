@@ -96,7 +96,7 @@ class MyPageScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     const Text(
-                      'Lv. 3 ',
+                      'Lv. 1 ',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 28,
@@ -109,7 +109,7 @@ class MyPageScreen extends StatelessWidget {
                       children: [
                         _buildStatItem('분리수거', '12회'),
                         _buildVerticalLine(),
-                        _buildStatItem('포인트', '1,250 P'),
+                        _buildStatItem('포인트', '0 P'),
                       ],
                     ),
                   ],

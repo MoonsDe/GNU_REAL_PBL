@@ -208,7 +208,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
               child: const Row(
                 children: [
-                  Text('6월'),
+                  Text('12월'),
                   Icon(Icons.arrow_drop_down, color: Colors.grey),
                 ],
               ),
